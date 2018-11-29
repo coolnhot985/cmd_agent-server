@@ -36,8 +36,11 @@ agent_type_t get_agent_type(json_object *json) {
                         return REQ_UX;
                     }
                 }
+                /* JSON 데이터에서 첫번째 키만 파싱 */
+                goto INVALID_PACKET;
         }
     }
+INVALID_PACKET:
 
     return REQ_INVALID;
 }
