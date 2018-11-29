@@ -16,9 +16,14 @@ JSON_INCLUDE_PATH	./src/Makefile	/^JSON_INCLUDE_PATH=$(PATH_SRC)\/lib\/json\/inc
 JSON_LIB_PATH	./src/Makefile	/^JSON_LIB_PATH=$(PATH_SRC)\/lib\/json\/lib\/libjson-c.a$/;"	m
 LIB	./src/Makefile	/^LIB = $(JSON_LIB_PATH)$/;"	m
 MAKE	./src/Makefile	/^MAKE=make$/;"	m
+MAX_RECV_BUFF_SIZE	./src/session.h	8;"	d
 OBJ	./src/Makefile	/^OBJ = $(SRC:.c=.o)$/;"	m
 PORT	./src/main.h	22;"	d
 PROGRAM	./src/Makefile	/^PROGRAM = ..\/cmd_agent$/;"	m
+REQ_INVALID	./src/cmd_agent.h	/^    REQ_INVALID         = 0,$/;"	e	enum:__anon1
+REQ_LINUX_CLAYMORE	./src/cmd_agent.h	/^    REQ_LINUX_CLAYMORE,$/;"	e	enum:__anon1
+REQ_UX	./src/cmd_agent.h	/^    REQ_UX,$/;"	e	enum:__anon1
+REQ_WINDOW_CLAYMORE	./src/cmd_agent.h	/^    REQ_WINDOW_CLAYMORE,$/;"	e	enum:__anon1
 SERVER_HELLO_PACKET_SIZE	./src/tcp.h	7;"	d
 SRC	./src/Makefile	/^SRC = main.c parse.c tcp.c session.c$/;"	m
 _CMD_AGENT_H_	./src/cmd_agent.h	2;"	d
@@ -26,17 +31,21 @@ _PARSE_H_	./src/parse.h	2;"	d
 _SESSION_H_	./src/session.h	2;"	d
 _TCP_H_	./src/main.h	2;"	d
 _TCP_H_	./src/tcp.h	2;"	d
+agent_type_t	./src/cmd_agent.h	/^}agent_type_t;$/;"	t	typeref:enum:__anon1
 do_accept	./src/main.c	/^int do_accept (int efd, int sfd) {$/;"	f
 do_add_fd	./src/main.c	/^int do_add_fd(int efd, int cfd) {$/;"	f
 do_del_fd	./src/main.c	/^int do_del_fd(int efd, int cfd) {$/;"	f
 do_modify_fd	./src/main.c	/^int do_modify_fd(int efd, int cfd) {$/;"	f
 do_use_fd	./src/session.c	/^int do_use_fd (int efd, struct epoll_event ev) {$/;"	f
+get_agent_type	./src/parse.c	/^agent_type_t get_agent_type(json_object *json) {$/;"	f
 init_acceptsock	./src/main.c	/^int init_acceptsock (unsigned short port) { $/;"	f
 init_epoll	./src/main.c	/^int init_epoll (int eventsize) { $/;"	f
 main	./src/main.c	/^int main (int argc, char **argv) {$/;"	f
 main	./src/temp/main.c	/^int main(void){$/;"	f
 parse_json_to_string	./src/parse.c	/^char* parse_json_to_string(json_object *json_obj) {$/;"	f
+parse_string_to_json	./src/parse.c	/^json_object* parse_string_to_json(char* str) {$/;"	f
 setnonblock	./src/main.c	/^int setnonblock (int sock) {$/;"	f
 setreuseaddr	./src/main.c	/^int setreuseaddr(int sock) {$/;"	f
 settcpnodelay	./src/main.c	/^int settcpnodelay (int sock) {$/;"	f
+socket_read	./src/session.c	/^char* socket_read(int fd) {$/;"	f
 tcp_hello	./src/tcp.c	/^char* tcp_hello(void) {$/;"	f
