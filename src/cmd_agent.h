@@ -12,4 +12,11 @@
 #define AGENT_TYPE_LINUX_NVIDIA     "linux-claymore-nvidia"
 #define AGENT_TYPE_UX               "ux"
 
+typedef enum {
+    REQ_INVALID         = 0,
+    REQ_UX,
+    REQ_LINUX_CLAYMORE,
+    REQ_WINDOW_CLAYMORE,
+}agent_type_t;
+
 #endif

@@ -140,7 +140,6 @@ int do_accept (int efd, int sfd) {
 
     do_add_fd(efd, sock_client_fd); 
     
-    DEBUG("client_fd [%d]", sock_client_fd);
     return sock_client_fd; 
 } 
 
