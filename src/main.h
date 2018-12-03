@@ -16,8 +16,6 @@
 #include <errno.h> 
 
 #include "cmd_agent.h"
-#include "json.h"
-#include "session.h"
 
 #define PORT        88
 
