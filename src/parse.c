@@ -1,5 +1,4 @@
 #include "parse.h"
-#include "cmd_agent.h"
 
 /** @brief      parse_string_to_json    문자열을 JSON 오브젝트로 변환
   * @params     str     변환할 문자열
@@ -7,7 +6,6 @@
   */
 json_object* parse_string_to_json(char* str) {
     json_object *json;
-    enum json_type type;
 
     json = json_tokener_parse(str);
 
@@ -21,8 +19,7 @@ json_object* parse_string_to_json(char* str) {
   */
 agent_type_t get_agent_type(json_object *json) {
     enum json_type  type;
-    int             result = -1;
-    char            *str = NULL;
+    const char      *str = NULL;
 
     json_object_object_foreach(json, key, val) {
         type = json_object_get_type(val);

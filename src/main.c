@@ -17,7 +17,6 @@ int main (int argc, char **argv) {
         return -1; 
     } 
 
-    // init pool 
     events = (struct epoll_event *) malloc (sizeof (*events) * poolsize); 
     if (NULL == events) { 
         perror ("epoll_create (0) error"); 
@@ -93,38 +92,32 @@ int init_epoll (int eventsize) {
 
 int init_acceptsock (unsigned short port) { 
     struct sockaddr_in addr;
-//  struct sockaddr_in clientaddr; 
-//  int clilen = sizeof (clientaddr); 
 
     int sfd = socket (AF_INET, SOCK_STREAM, 0); 
 
-    if (sfd == -1) 
-    { 
-        perror ("socket error :"); 
-        close (sfd); 
+    if (sfd == -1) { 
+        perror("socket error :"); 
+        close(sfd); 
         return -1; 
     } 
 
     setreuseaddr(sfd); 
-
     addr.sin_family = AF_INET; 
     addr.sin_port = htons (port); 
     addr.sin_addr.s_addr = htonl (INADDR_ANY); 
-    if (bind (sfd, (struct sockaddr *) &addr, sizeof (addr)) == -1) 
-    { 
-        close (sfd); 
+
+    if (bind(sfd,(struct sockaddr *)&addr, sizeof(addr)) == -1) { 
+        close(sfd); 
         return -2; 
     } 
-    listen (sfd, 5); 
+    listen(sfd, 5); 
     return sfd; 
 } 
 
 int do_accept (int efd, int sfd) {
     int sock_client_fd = 0;
 
-    //int clilen;
     socklen_t clilen;
-    //struct sockaddr_in addr;
     struct sockaddr_in clientaddr;
 
     sock_client_fd = accept(sfd, (struct sockaddr *) &clientaddr, &clilen);
