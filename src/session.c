@@ -20,6 +20,15 @@ int do_use_fd (int efd, struct epoll_event ev) {
         recv_data_json = parse_string_to_json(recv_data);   /* 문자열 데이터를 JSON 포멧으로 변환 */
         agent_type = get_agent_type(recv_data_json); 
 
+        switch(agent_type) {
+            case (REQ_UX):
+                break;
+            case (REQ_LINUX_CLAYMORE):
+                send(cfd, "SYN_ACK", strlen("SYN_ACK"), MSG_DONTWAIT); 
+                break;
+            case (REQ_WINDOW_CLAYMORE):
+                break;
+        }
         break;
     }
 
