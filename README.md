@@ -5,3 +5,5 @@
                 mysql_config --cflags
                                 apt-get install libmysqlclient-dev
 
+socket fd limit 
+/etc/security/limits.conf
