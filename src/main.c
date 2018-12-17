@@ -178,6 +178,13 @@ fd_status_t on_peer_ready_send(int sockfd) {
 }
 
 int main(int argc, const char** argv) {
+    MYSQL *conn = NULL;
+   
+    conn = mysql_conn(); 
+    if (conn == NULL) {
+        DEBUG("Fail : conn databases");
+    }
+
     setvbuf(stdout, NULL, _IONBF, 0);
 
     int portnum = 88;
@@ -303,5 +310,6 @@ int main(int argc, const char** argv) {
             }
         }
     }
+    free(conn);
     return 0;
 }
