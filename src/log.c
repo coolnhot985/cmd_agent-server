@@ -7,24 +7,6 @@
 #define DB_PORT         "3306"
 #define QUERY_LEN       256
 
-#if 0
-MYSQL* mysql_conn(MYSQL *conn){ 
-    MYSQL mysql;
-    //MYSQL *conn = NULL;
-    MYSQL *ret  = NULL;
-//    conn = (MYSQL*)malloc(sizeof(MYSQL));
-    mysql_init(conn);
-    ret = mysql_real_connect(conn, HOST, USER, PASSWD, DB_NAME, 
-            3306, (char*)NULL, 1);
-    if (ret == NULL) {
-        DEBUG("Fail : conn databases");
-        return NULL;
-    } 
-
-    return conn; 
-}
-#endif
-
 MYSQL* mysql_conn(void) {
     MYSQL *conn = NULL;
     conn = (MYSQL*)malloc(sizeof(MYSQL));
