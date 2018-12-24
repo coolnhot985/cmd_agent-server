@@ -1,5 +1,6 @@
 #include "main.h"
 #include "utils.h"
+#include "log.h"
 
 #define USE_ET 1
 
@@ -41,7 +42,7 @@ peer_state_t global_state[MAXFDS];
 // want_write=true means we want to keep monitoring this fd for writing.
 // When both are false it means the fd is no longer needed and can beclosed.
 
-fd_status_t on_peer_connected(int sockfd, const struct sockaddr_in* peer_addr,
+fd_status_t on_peer_connected(int sockfd, const struct sockaddr_in* peer_addr, 
         socklen_t peer_addr_len) {
     assert(sockfd < MAXFDS);
     report_peer_connected(peer_addr, peer_addr_len);
@@ -60,7 +61,7 @@ fd_status_t on_peer_connected(int sockfd, const struct sockaddr_in* peer_addr,
     return fd_status_R;
 }
 
-fd_status_t on_peer_ready_recv(int fd) {
+fd_status_t on_peer_ready_recv(MYSQL *conn, int fd) {
     assert(fd < MAXFDS);
     peer_state_t* peerstate = &global_state[fd];
     char    *recv_data = NULL;
@@ -90,18 +91,35 @@ fd_status_t on_peer_ready_recv(int fd) {
         cmd = parse_json_cmd(recv_data_json);
     } else if (agent_type == REQ_LINUX_CLAYMORE) {
         agent_data = parse_json_agent(recv_data_json);
+        agent_data->fd = fd;
     }
 
     switch(agent_type) {
         case (REQ_INVALID):
             break;
         case (REQ_UX):
-            ready_to_send = false;
+            /* UX 요청의 맥으로 세션테이블을 조회해 FD 를 얻음 */
+            ret = mysql_select_fd(conn, cmd->miner_mac);
+            if (ret < 0) {
+                DEBUG("Fail : mysql_select_fd");
+            }
+
+            /* 위 FD 로 클라이언트에게 데이터를 전송 */
+
             break; 
         case (REQ_LINUX_CLAYMORE):
+#if 0
+            /* 핸드쉐이크는 없어지는게 맞는거같다 */
             peerstate->send_data = (char*)malloc(SYNACK_LEN);
             memcpy(peerstate->send_data, "SYN_ACK\0", SYNACK_LEN);
             ready_to_send = true;
+#endif 
+            /* 클라이언트 세션이 맺어지면 해당 세션FD 를 디비에 저장 */
+            BREAK("mac [%s] fd [%d]", agent_data->miner_mac, agent_data->fd);
+            ret = mysql_insert_fd(conn, agent_data->miner_mac, agent_data->fd);
+            if (ret < 0)
+                DEBUG("Fail : mysql_insert_fd");
+            BREAK("");
             break;
         case (REQ_WINDOW_CLAYMORE):
             break;
@@ -266,7 +284,7 @@ int main(int argc, const char** argv) {
                 if (events[i].events & EPOLLIN) {
                     // Ready for reading.
                     int fd = events[i].data.fd;
-                    fd_status_t status = on_peer_ready_recv(fd);
+                    fd_status_t status = on_peer_ready_recv(conn, fd);
                     struct epoll_event event = {0};
                     event.data.fd = fd;
                     if (status.want_read) {
