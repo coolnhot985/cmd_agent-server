@@ -45,38 +45,31 @@ char* socket_read(int fd, int *ret) {
     return recv_data;
 }
 
+char* msg_client_info(size_t *len, const char *req_cmd, const char *req_path) {
+    const char  *str    = NULL;
+    char        *buff   = NULL;
 
-#if 0
-int socket_read(int fd, char* recv_data) {
-    int     len = 0;
-    int     recv_len = 0;
-    size_t  offset = 0;
+    json_object *json = json_object_new_object();
+    json_object *cmd = json_object_new_string(req_cmd);
+    json_object *path = json_object_new_string(req_path);
 
-    char    buff[MAX_RECV_BUFF_SIZE];
-    
-    recv_data = (char*)malloc(MAX_RECV_BUFF_SIZE);
-    memset(recv_data, 0x0, MAX_RECV_BUFF_SIZE);
+    json_object_object_add(json, "commend_type", cmd);
+    json_object_object_add(json, "path", path);
 
-    while (len >= 0) {
-        memset(buff, 0x00, MAX_RECV_BUFF_SIZE);
-        //len = read(fd, buff, MAX_RECV_BUFF_SIZE);
-        len = recv(fd, buff, MAX_RECV_BUFF_SIZE, MSG_DONTWAIT);
-        if (len <= 0) {
-            DEBUG("Fail .. ERR [%d]", len);
-            return -1;
-        }
+    str = json_object_get_string(json);
 
-        recv_len += len;
-        recv_data = realloc(recv_data, recv_len);
+    *len = strlen(str);
+    buff = strndup(str, len);
 
-        memcpy(recv_data + offset, buff, len);
-        offset += len;
-
-        if (recv_data[recv_len - 1] == '\0' || recv_data[recv_len] == '\0') {
-            return -2;
-        }
-    }
-
-    return 1;
+    return buff;
 }
-#endif
+
+int append_null(char *str, int len) {
+    len++;
+    str = realloc(str, len);
+
+    *(str + len) = '\0';
+
+    return len;
+}
+

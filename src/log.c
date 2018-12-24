@@ -41,11 +41,9 @@ int mysql_insert_fd(MYSQL *conn, char *miner_mac, int fd) {
 
     /*  insert */
     if (mysql_query(conn, query_insert) == 0) {
-        DEBUG("insert mac [%s] fd [%d]", miner_mac, fd);
         return fd;
     /* update */
     } else if (mysql_query(conn, query_update) == 0) {
-        DEBUG("update mac [%s] fd [%d]", miner_mac, fd);
         return fd;
     } else {
         DEBUG("[Fail] mysql_query");
@@ -54,7 +52,6 @@ int mysql_insert_fd(MYSQL *conn, char *miner_mac, int fd) {
     DEBUG("[Fail] mysql_select_fd");
     return -1;
 }
-
 
 int mysql_select_fd(MYSQL *conn, char *miner_mac) {
     MYSQL_RES   *ret;

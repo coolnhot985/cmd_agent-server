@@ -65,10 +65,13 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd) {
     assert(fd < MAXFDS);
     peer_state_t* peerstate = &global_state[fd];
     char    *recv_data = NULL;
+    char    *send_data = NULL;
     cmd_t   *cmd = NULL;
     agent_t *agent_data = NULL; 
     bool    ready_to_send = false;
     int     ret = 0;
+    size_t  len_send_data = 0;
+    
    
     recv_data = socket_read(fd, &ret);
     if (ret == -1) {
@@ -102,9 +105,14 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd) {
             ret = mysql_select_fd(conn, cmd->miner_mac);
             if (ret < 0) {
                 DEBUG("Fail : mysql_select_fd");
+                /** 클라이언트 접속정보 쿼리 실패 
+                  * UX 로 클라이언트 접속실패 noti */
+            } else {
+                /** 클라이언트 접속정보 쿼리 성공 
+                 * 클라이언트 세션과 연결 */
+                send_data = msg_client_info(&len_send_data, cmd->cmd_type, cmd->path);
+                send(ret, send_data, len_send_data, MSG_DONTWAIT);
             }
-
-            /* 위 FD 로 클라이언트에게 데이터를 전송 */
 
             break; 
         case (REQ_LINUX_CLAYMORE):
@@ -115,11 +123,9 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd) {
             ready_to_send = true;
 #endif 
             /* 클라이언트 세션이 맺어지면 해당 세션FD 를 디비에 저장 */
-            BREAK("mac [%s] fd [%d]", agent_data->miner_mac, agent_data->fd);
             ret = mysql_insert_fd(conn, agent_data->miner_mac, agent_data->fd);
             if (ret < 0)
                 DEBUG("Fail : mysql_insert_fd");
-            BREAK("");
             break;
         case (REQ_WINDOW_CLAYMORE):
             break;

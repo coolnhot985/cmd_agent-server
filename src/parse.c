@@ -92,7 +92,13 @@ cmd_t* parse_json_cmd(json_object *json_obj) {
                 } else if (strcmp(key, "miner_mac") == 0) {
                     cmd->miner_mac = json_object_get_string(val);
                 } else if (strcmp(key, "path") == 0) {
-                    cmd->path = json_object_get_string(val);
+                    if (0 != json_object_get_string_len(val)) {
+                        BREAK("");
+                        cmd->path = json_object_get_string(val);
+                    } else {
+                        cmd->path = (char*)malloc(sizeof(1));;
+                        cmd->path = "\0";
+                    }
                 }
                 break;
         }
