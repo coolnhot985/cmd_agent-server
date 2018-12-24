@@ -21,12 +21,13 @@ MYSQL* mysql_conn(void) {
     return conn; 
 }
 
+/** @brief  mysql_insert_fd
+  * @param  conn        db connection 
+  *         miner_mac   client(miner) mac addr
+  *         fd          client(miner) socket fd
+  * @return when successed return positive else nagative 
+  */
 int mysql_insert_fd(MYSQL *conn, char *miner_mac, int fd) {
-    MYSQL_RES   *ret;
-    MYSQL_ROW   row;
-
-    int             result      = 0;
-
     char query_insert[256] = {0, };
     char query_update[256] = {0, };
 
@@ -42,30 +43,15 @@ int mysql_insert_fd(MYSQL *conn, char *miner_mac, int fd) {
     if (mysql_query(conn, query_insert) == 0) {
         DEBUG("insert mac [%s] fd [%d]", miner_mac, fd);
         return fd;
-#if 0
-        ret = mysql_store_result(conn);
-        if (ret != NULL) {
-            row = mysql_fetch_row(ret);
-            if (row == NULL) {
-                DEBUG("Fail : mysql_fetch_row");
-            }
-            /* succese mysql_select_fd */
-            fd = atoi(row[0]);
-            return fd;
-        } else {
-            DEBUG("Fail : mysql_store_result");
-            return -4;
-        }
-#endif
     /* update */
     } else if (mysql_query(conn, query_update) == 0) {
         DEBUG("update mac [%s] fd [%d]", miner_mac, fd);
         return fd;
     } else {
-        DEBUG("Fail : mysql_query");
+        DEBUG("[Fail] mysql_query");
         return -2;
     }
-    DEBUG("Fail : mysql_select_fd");
+    DEBUG("[Fail] mysql_select_fd");
     return -1;
 }
 
@@ -75,15 +61,13 @@ int mysql_select_fd(MYSQL *conn, char *miner_mac) {
     MYSQL_ROW   row;
 
     unsigned int    fd          = 0;
-    int             result      = 0;
 
     char query[256] = {0, };
 
     sprintf(query, "select fd from cmd_agent_session where mac = '%s'", 
             miner_mac);
 
-    result = mysql_query(conn, query);
-    if (result == 0) {
+    if (mysql_query(conn, query) == 0) {
         ret = mysql_store_result(conn);
         if (ret != NULL) {
             row = mysql_fetch_row(ret);
