@@ -6,6 +6,8 @@
 #define MAX_RECV_BUFF_SIZE 256
 
 char* socket_read(int fd, int *result);
+char* msg_client_info(size_t *len, const char *req_cmd, const char *req_path);
+int append_null(char *str, int len);
 
 #endif
 
