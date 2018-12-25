@@ -86,3 +86,22 @@ int mysql_select_fd(MYSQL *conn, char *miner_mac) {
     return -2;
 }
 
+int mysql_delete_fd(MYSQL *conn, char *miner_mac) {
+    char query[256] = {0, };
+
+    sprintf(query, 
+            "delete from cmd_agent_session where mac='%s'", 
+            miner_mac); 
+
+    BREAK("query [%s]", query);
+    /*  delete */
+    if (mysql_query(conn, query) == 0) {
+        return 0;
+    } else {
+        DEBUG("[Fail] mysql_query");
+        return -2;
+    }
+    DEBUG("[Fail] mysql_select_fd");
+    return -1;
+}
+

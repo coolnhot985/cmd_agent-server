@@ -61,13 +61,12 @@ fd_status_t on_peer_connected(int sockfd, const struct sockaddr_in* peer_addr,
     return fd_status_R;
 }
 
-fd_status_t on_peer_ready_recv(MYSQL *conn, int fd) {
+fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, agent_t *agent_data) {
     assert(fd < MAXFDS);
     peer_state_t* peerstate = &global_state[fd];
     char    *recv_data = NULL;
     char    *send_data = NULL;
     cmd_t   *cmd = NULL;
-    agent_t *agent_data = NULL; 
     bool    ready_to_send = false;
     int     ret = 0;
     size_t  len_send_data = 0;
@@ -93,7 +92,7 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd) {
     if (agent_type == REQ_UX) {
         cmd = parse_json_cmd(recv_data_json);
     } else if (agent_type == REQ_LINUX_CLAYMORE) {
-        agent_data = parse_json_agent(recv_data_json);
+        parse_json_agent(recv_data_json, agent_data);
         agent_data->fd = fd;
     }
 
@@ -201,8 +200,9 @@ fd_status_t on_peer_ready_send(int sockfd) {
 }
 
 int main(int argc, const char** argv) {
-    MYSQL *conn = NULL;
-   
+    MYSQL   *conn       = NULL;
+    static agent_t *agent_data = NULL;
+
     conn = mysql_conn(); 
     if (conn == NULL) {
         DEBUG("Fail : conn databases");
@@ -237,6 +237,7 @@ int main(int argc, const char** argv) {
     }
 
     while (1) {
+        agent_data = (agent_t*)malloc(sizeof(agent_t));
         int nready = epoll_wait(epollfd, events, MAXFDS, -1);
         for (int i = 0; i < nready; i++) {
             if (events[i].events & EPOLLERR) {
@@ -289,7 +290,7 @@ int main(int argc, const char** argv) {
                 if (events[i].events & EPOLLIN) {
                     // Ready for reading.
                     int fd = events[i].data.fd;
-                    fd_status_t status = on_peer_ready_recv(conn, fd);
+                    fd_status_t status = on_peer_ready_recv(conn, fd, agent_data);
                     struct epoll_event event = {0};
                     event.data.fd = fd;
                     if (status.want_read) {
@@ -299,10 +300,11 @@ int main(int argc, const char** argv) {
                         event.events |= EPOLLOUT;
                     }
                     if (event.events == 0) {
-                        printf("socket %d closing\n", fd);
+                        mysql_delete_fd(conn, agent_data->miner_mac);
                         if (epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, NULL) < 0) {
                             perror_die("epoll_ctl EPOLL_CTL_DEL");
                         }
+                        printf("socket %d closing\n", fd);
                         close(fd);
                     } else if (epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &event) < 0) {
                         perror_die("epoll_ctl EPOLL_CTL_MOD");
@@ -332,6 +334,7 @@ int main(int argc, const char** argv) {
                 }
             }
         }
+        free(agent_data);
     }
     free(conn);
     return 0;

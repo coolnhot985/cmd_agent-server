@@ -107,11 +107,9 @@ cmd_t* parse_json_cmd(json_object *json_obj) {
     return cmd;
 }
 
-agent_t* parse_json_agent(json_object *json_obj) {
+void parse_json_agent(json_object *json_obj, agent_t *agent_data) {
     enum json_type  type;
-    agent_t        *agent_data = NULL;
 
-    agent_data = (agent_t*)malloc(sizeof(agent_t));
     json_object_object_foreach(json_obj, key, val) {
         type = json_object_get_type(val);
         switch (type) {
@@ -134,7 +132,7 @@ agent_t* parse_json_agent(json_object *json_obj) {
                 break;
         }
     }
-    return agent_data;
+    return;
 }
 
 

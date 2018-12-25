@@ -7,6 +7,6 @@
 MYSQL* mysql_conn(void); 
 int mysql_select_fd(MYSQL *conn, char *miner_mac);
 int mysql_insert_fd(MYSQL *conn, char *miner_mac, int fd);
-
+int mysql_delete_fd(MYSQL *conn, char *miner_mac);
 
 #endif

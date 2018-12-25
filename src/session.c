@@ -49,8 +49,6 @@ char* msg_client_info(size_t *len, const cmd_t *req_cl) {
     const char  *str    = NULL;
     char        *buff   = NULL;
 
-    BREAK("[%s], [%s], [%d]", req_cl->cmd_type, req_cl->path, req_cl->sequence);
-
     json_object *json   = json_object_new_object();
     json_object *cmd    = json_object_new_string(req_cl->cmd_type);
     json_object *path   = json_object_new_string(req_cl->path);
