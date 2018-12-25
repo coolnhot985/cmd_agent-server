@@ -89,11 +89,12 @@ cmd_t* parse_json_cmd(json_object *json_obj) {
             case json_type_string: 
                 if (strcmp(key, "commend_type") == 0) {
                     cmd->cmd_type = json_object_get_string(val);
+                } else if(strcmp(key, "sequence") == 0) {
+                    cmd->sequence = atoi(json_object_get_string(val));
                 } else if (strcmp(key, "miner_mac") == 0) {
                     cmd->miner_mac = json_object_get_string(val);
                 } else if (strcmp(key, "path") == 0) {
                     if (0 != json_object_get_string_len(val)) {
-                        BREAK("");
                         cmd->path = json_object_get_string(val);
                     } else {
                         cmd->path = (char*)malloc(sizeof(1));;

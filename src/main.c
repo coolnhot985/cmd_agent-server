@@ -110,7 +110,7 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd) {
             } else {
                 /** 클라이언트 접속정보 쿼리 성공 
                  * 클라이언트 세션과 연결 */
-                send_data = msg_client_info(&len_send_data, cmd->cmd_type, cmd->path);
+                send_data = msg_client_info(&len_send_data, cmd);
                 send(ret, send_data, len_send_data, MSG_DONTWAIT);
             }
 
@@ -176,7 +176,6 @@ fd_status_t on_peer_ready_send(int sockfd) {
     }
     int sendlen = peerstate->sendbuf_end - peerstate->sendptr;
     int nsent = send(sockfd, peerstate->send_data, sendlen, 0);
-    DEBUG("send_data [%s]", peerstate->send_data);
     if (nsent == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             return fd_status_W;

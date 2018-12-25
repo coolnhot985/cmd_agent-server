@@ -45,16 +45,20 @@ char* socket_read(int fd, int *ret) {
     return recv_data;
 }
 
-char* msg_client_info(size_t *len, const char *req_cmd, const char *req_path) {
+char* msg_client_info(size_t *len, const cmd_t *req_cl) {
     const char  *str    = NULL;
     char        *buff   = NULL;
 
-    json_object *json = json_object_new_object();
-    json_object *cmd = json_object_new_string(req_cmd);
-    json_object *path = json_object_new_string(req_path);
+    BREAK("[%s], [%s], [%d]", req_cl->cmd_type, req_cl->path, req_cl->sequence);
+
+    json_object *json   = json_object_new_object();
+    json_object *cmd    = json_object_new_string(req_cl->cmd_type);
+    json_object *path   = json_object_new_string(req_cl->path);
+    json_object *sequence = json_object_new_int(req_cl->sequence);
 
     json_object_object_add(json, "commend_type", cmd);
     json_object_object_add(json, "path", path);
+    json_object_object_add(json, "sequence", sequence);
 
     str = json_object_get_string(json);
 
