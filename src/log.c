@@ -63,17 +63,19 @@ int mysql_select_fd(MYSQL *conn, char *miner_mac) {
 
     sprintf(query, "select fd from cmd_agent_session where mac = '%s'", 
             miner_mac);
+    BREAK("query [%s]", query);
 
     if (mysql_query(conn, query) == 0) {
         ret = mysql_store_result(conn);
         if (ret != NULL) {
             row = mysql_fetch_row(ret);
-            if (row == NULL) {
+            if (row != NULL) {
+                fd = atoi(row[0]);
+                return fd;
+            } else {
                 DEBUG("Fail : mysql_fetch_row");
+                return -5;
             }
-            /* succese mysql_select_fd */
-            fd = atoi(row[0]);
-            return fd;
         } else {
             DEBUG("Fail : mysql_store_result");
             return -4;
