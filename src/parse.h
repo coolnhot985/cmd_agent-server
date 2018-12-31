@@ -8,11 +8,13 @@ typedef struct _cmd_t {
     int     sequence;
     char*   miner_mac;
     char*   path;
+    char*   path_install;
 }cmd_t;
 
 typedef struct _agent_t {
     int     fd; 
     char*   miner_mac;
+    char*   agent_type;
 }agent_t;
 
 json_object*    parse_string_to_json(char* str);

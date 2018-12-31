@@ -63,7 +63,6 @@ int mysql_select_fd(MYSQL *conn, char *miner_mac) {
 
     sprintf(query, "select fd from cmd_agent_session where mac = '%s'", 
             miner_mac);
-    BREAK("query [%s]", query);
 
     if (mysql_query(conn, query) == 0) {
         ret = mysql_store_result(conn);
@@ -95,7 +94,6 @@ int mysql_delete_fd(MYSQL *conn, char *miner_mac) {
             "delete from cmd_agent_session where mac='%s'", 
             miner_mac); 
 
-    BREAK("query [%s]", query);
     /*  delete */
     if (mysql_query(conn, query) == 0) {
         return 0;

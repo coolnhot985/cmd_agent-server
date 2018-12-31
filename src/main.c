@@ -74,7 +74,6 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, agent_t *agent_data) {
 
     int     cmd_type        = 0;
     
-   
     recv_data = socket_read(fd, &ret);
     if (ret == -1) {
         return fd_status_NORW;

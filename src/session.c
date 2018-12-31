@@ -88,21 +88,15 @@ char* msg_client_info(size_t *len, const cmd_t *req_cl) {
                 fseek(fp, 0, SEEK_SET);
                 ret = fread(file_buff, sizeof(char), (size_t)file_size, fp);
                 file_buff[file_size + 1] = NULL;
-#if 0
-                if (fw = fopen("test", "wb") != NULL) {
-                    fw = fopen("test.txt", "wb");
-                    //file_buff[file_size + 1] = '\0';
-                    //ret = fwrite(file_buff, sizeof(char), (size_t)file_size + 1, fw);
-                    fwrite(test, 1, strlen(test), fw);
-                    close(fw);
-                }
-#endif
                 break;
             }
     }
     
     json_object *content = json_object_new_string(file_buff);
     json_object_object_add(json, "content", content);
+
+    json_object *path_install = json_object_new_string(req_cl->path_install);
+    json_object_object_add(json, "path_install", path_install);
 
     str = json_object_get_string(json);
 
