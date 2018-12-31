@@ -107,3 +107,29 @@ int mysql_delete_fd(MYSQL *conn, char *miner_mac) {
     return -1;
 }
 
+
+/** @brief mysql_update_log 
+  * @param  conn        db connection 
+  *         sequence
+  *         status
+  * @return when successed return positive else nagative 
+  */
+int mysql_update_log(MYSQL *conn, int sequence, char *miner_mac, int status) {
+    char query_update[256] = {0, };
+
+    sprintf(query_update, 
+            "update cmd_agent_session set status = %d \
+            where sequence = '%d' ANDi mac = '%s'",
+            status, sequence, miner_mac);
+
+    /* update */
+    if (mysql_query(conn, query_update) == 0) {
+        return 0;
+    } else {
+        DEBUG("[Fail] mysql_query");
+        return -2;
+    }
+    DEBUG("[Fail] mysql_update_log");
+    return -1;
+}
+

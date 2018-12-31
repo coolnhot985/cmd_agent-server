@@ -71,6 +71,8 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, agent_t *agent_data) {
     int     ret             = 0;
     size_t  len_send_data   = 0;
     size_t  result          = 0;
+
+    int     cmd_type        = 0;
     
    
     recv_data = socket_read(fd, &ret);
@@ -112,8 +114,10 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, agent_t *agent_data) {
                  * 클라이언트 세션과 연결 */
                 send_data = msg_client_info(&len_send_data, cmd);
                 result = send(ret, send_data, len_send_data, MSG_CONFIRM);
-                if (result < 0) {
+                if (result > 0) {
                     /* 접속된 클라이언트로 실제 트레픽이 발송됨*/
+
+
                 } else {
                     /** 세션테이블에서 FD 로 가져와 클라이언트로 접속시도
                       * 세션테이블 FD 동기화 실패로 클라이언트와 통신실패 */

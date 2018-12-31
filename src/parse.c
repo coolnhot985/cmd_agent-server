@@ -135,4 +135,12 @@ void parse_json_agent(json_object *json_obj, agent_t *agent_data) {
     return;
 }
 
+int parse_cmd_type(const char *cmd_type) {
+    DEBUG("cmd_type [%s]", cmd_type);
+    if (strcmp(cmd_type, "file-download") == 0) {
+        return 1;
+    } 
+
+    return -1;
+}
 
