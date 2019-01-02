@@ -67,11 +67,11 @@ char* parse_json_to_string(json_object *json_obj) {
     }
 }
 
-cmd_t* parse_json_cmd(json_object *json_obj) {
+session_t* parse_json_cmd(json_object *json_obj) {
     enum    json_type type;
-    cmd_t   *cmd = NULL;
+    session_t   *session = NULL;
 
-    cmd = (cmd_t*)malloc(sizeof(cmd_t));
+    session = (session_t*)malloc(sizeof(session_t));
     json_object_object_foreach(json_obj, key, val) {
         type = json_object_get_type(val);
         switch (type) {
@@ -89,33 +89,33 @@ cmd_t* parse_json_cmd(json_object *json_obj) {
                 break;
             case json_type_string: 
                 if (strcmp(key, "commend_type") == 0) {
-                    cmd->cmd_type = json_object_get_string(val);
+                    session->cmd_type = (char*)json_object_get_string(val);
                 } else if(strcmp(key, "sequence") == 0) {
-                    cmd->sequence = atoi(json_object_get_string(val));
+                    session->sequence = atoi(json_object_get_string(val));
                 } else if (strcmp(key, "miner_mac") == 0) {
-                    cmd->miner_mac = json_object_get_string(val);
+                    session->miner_mac = (char*)json_object_get_string(val);
                 } else if (strcmp(key, "path") == 0) {
                     if (0 != json_object_get_string_len(val)) {
-                        cmd->path = json_object_get_string(val);
+                        session->path = (char*)json_object_get_string(val);
                     } else {
-                        cmd->path = (char*)malloc(sizeof(1));
-                        cmd->path = "\0";
+                        session->path = (char*)malloc(sizeof(1));
+                        session->path = "\0";
                     }
                 } else if (strcmp(key, "path_install") == 0) {
                     if (0 != json_object_get_string_len(val)) {
-                        cmd->path_install = json_object_get_string(val);
+                        session->path_install = (char*)json_object_get_string(val);
                     } else {
-                        cmd->path_install = (char*)malloc(sizeof(1));
-                        cmd->path_install = NULL;
+                        session->path_install = (char*)malloc(sizeof(1));
+                        session->path_install = NULL;
                     }
                 }
                 break;
         }
     }
-    return cmd;
+    return session;
 }
 
-void parse_json_agent(json_object *json_obj, agent_t *agent_data) {
+void parse_json_agent(json_object *json_obj, session_t *session) {
     enum json_type  type;
 
     json_object_object_foreach(json_obj, key, val) {
@@ -135,7 +135,7 @@ void parse_json_agent(json_object *json_obj, agent_t *agent_data) {
                 break;
             case json_type_string: 
                 if (strcmp(key, "miner_mac") == 0) {
-                    agent_data->miner_mac = json_object_get_string(val);
+                    session->miner_mac = (char*)json_object_get_string(val);
                 }
                 break;
         }

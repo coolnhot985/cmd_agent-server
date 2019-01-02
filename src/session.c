@@ -45,7 +45,7 @@ char* socket_read(int fd, int *ret) {
     return recv_data;
 }
 
-char* msg_client_info(size_t *len, const cmd_t *req_cl) {
+char* msg_client_info(size_t *len, const session_t *session) {
     const char  *str        = NULL;
     char        *buff       = NULL;
     int         cmd_type    = 0;
@@ -56,20 +56,20 @@ char* msg_client_info(size_t *len, const cmd_t *req_cl) {
     size_t      ret         = 0;
 
     json_object *json   = json_object_new_object();
-    json_object *cmd    = json_object_new_string(req_cl->cmd_type);
-    json_object *path   = json_object_new_string(req_cl->path);
-    json_object *sequence = json_object_new_int(req_cl->sequence);
+    json_object *cmd    = json_object_new_string(session->cmd_type);
+    json_object *path   = json_object_new_string(session->path);
+    json_object *sequence = json_object_new_int(session->sequence);
 
     json_object_object_add(json, "commend_type", cmd);
     json_object_object_add(json, "path", path);
     json_object_object_add(json, "sequence", sequence);
 
-    cmd_type = parse_cmd_type(req_cl->cmd_type);
+    cmd_type = parse_cmd_type(session->cmd_type);
 
     switch (cmd_type) {
         case 1:
-            if ((fp = fopen(req_cl->path, "r") != NULL)) {
-                fp = fopen(req_cl->path, "r");
+            if ((fp = fopen(session->path, "r") != NULL)) {
+                fp = fopen(session->path, "r");
                 
                 /* 파일포인터를 파일끝으로 이동시켜 길이 계산 */
                 fseek(fp, 0, SEEK_END);
@@ -91,7 +91,7 @@ char* msg_client_info(size_t *len, const cmd_t *req_cl) {
     json_object *content = json_object_new_string(file_buff);
     json_object_object_add(json, "content", content);
 
-    json_object *path_install = json_object_new_string(req_cl->path_install);
+    json_object *path_install = json_object_new_string(session->path_install);
     json_object_object_add(json, "path_install", path_install);
 
     str = json_object_get_string(json);

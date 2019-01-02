@@ -42,7 +42,33 @@
 #define DB_PORT         "3306"
 #define QUERY_LEN       256
 
+typedef enum {
+    REQ_INVALID         = 0,
+    REQ_UX,
+    REQ_LINUX_CLAYMORE,
+    REQ_WINDOW_CLAYMORE,
+}agent_type_t;
 
+/** @brief session_t
+  * @param  fd
+  *         agent_type
+  *         cmd_type
+  *         miner_mac
+  *         path
+  *         path_install
+  */
+typedef struct _session_t {
+    int             fd;
+    agent_type_t    agent_type;
+    int             client_fd;
+    char            *cmd_type;
+    char            *miner_mac;
+    char            *path;
+    char            *path_install;
+    int             sequence;
+}session_t;
+
+#if 0
 typedef struct _cmd_t {
     char*   cmd_type;
     int     sequence;
@@ -56,17 +82,12 @@ typedef struct _agent_t {
     char*   miner_mac;
     char*   agent_type;
 }agent_t;
+#endif
 
-typedef enum {
-    REQ_INVALID         = 0,
-    REQ_UX,
-    REQ_LINUX_CLAYMORE,
-    REQ_WINDOW_CLAYMORE,
-}agent_type_t;
 
 /* session.c */
 char* socket_read(int fd, int *result);
-char* msg_client_info(size_t *len, const cmd_t *req_cl);
+char* msg_client_info(size_t *len, const session_t *session);
 int append_null(char *str, int len);
 
 /* log.c */
@@ -80,8 +101,8 @@ int mysql_update_log(MYSQL *conn, int sequence, char *miner_mac, int status);
 json_object* parse_string_to_json(char* str);
 int get_agent_type(json_object *json);
 char* parse_json_to_string(json_object *json_obj);
-cmd_t* parse_json_cmd(json_object *json_obj);
-void parse_json_agent(json_object *json_obj, agent_t *agent_data);
+session_t* parse_json_cmd(json_object *json_obj);
+void parse_json_agent(json_object *json_obj, session_t *session);
 int parse_cmd_type(const char *cmd_type);
 
 /* util.c */
