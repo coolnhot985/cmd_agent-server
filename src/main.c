@@ -64,8 +64,8 @@ fd_status_t on_peer_connected(int sockfd, const struct sockaddr_in* peer_addr,
 }
 
 fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
-    assert(session->fd < MAXFDS);
-    peer_state_t* peerstate = &global_state[session->fd];
+    assert(fd < MAXFDS);
+    peer_state_t* peerstate = &global_state[fd];
     char    *recv_data      = NULL;
     char    *send_data      = NULL;
     bool    ready_to_send   = false;
@@ -73,7 +73,7 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
     size_t  len_send_data   = 0;
     size_t  result          = 0;
     
-    recv_data = socket_read(session->fd, &ret);
+    recv_data = socket_read(fd, &ret);
     if (ret == -1) {
         return fd_status_NORW;
     } else if (ret == -2) {
@@ -82,7 +82,7 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
         perror_die("recv");
     }
 
-    DEBUG("recv_data [%s] fd [%d]", recv_data, session->fd);
+    DEBUG("recv_data [%s] fd [%d]", recv_data, fd);
 
     json_object     *recv_data_json;
     agent_type_t    agent_type;
