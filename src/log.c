@@ -1,11 +1,4 @@
-#include "log.h"
-
-#define HOST            "127.0.0.1"
-#define USER            "root"
-#define PASSWD          ""
-#define DB_NAME         "monitoring"
-#define DB_PORT         "3306"
-#define QUERY_LEN       256
+#include "main.h"
 
 MYSQL* mysql_conn(void) {
     MYSQL *conn = NULL;

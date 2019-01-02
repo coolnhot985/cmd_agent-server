@@ -1,6 +1,4 @@
 #include "main.h"
-#include "utils.h"
-#include "log.h"
 
 #define USE_ET 1
 
@@ -10,6 +8,7 @@ typedef enum { INITIAL_ACK, WAIT_FOR_MSG, IN_MSG } ProcessingState;
 
 #define SENDBUF_SIZE 1024
 #define SYNACK_LEN 8
+
 typedef struct {
     ProcessingState state;
     char *send_data;
@@ -27,7 +26,6 @@ const fd_status_t fd_status_W = {.want_read = false, .want_write = true};
 const fd_status_t fd_status_RW = {.want_read = true, .want_write = true};
 const fd_status_t fd_status_NORW = {.want_read = false, .want_write = false};
 
-
 // Each peer is globally identified by the file descriptor (fd) it's connected
 // on. As long as the peer is connected, the fd is unique to it. When a peer
 // disconnects, a new peer may connect and get the same fd. on_peer_connected
@@ -41,6 +39,10 @@ peer_state_t global_state[MAXFDS];
 // want_read=true means we want to keep monitoring this fd for reading.
 // want_write=true means we want to keep monitoring this fd for writing.
 // When both are false it means the fd is no longer needed and can beclosed.
+
+fd_status_t on_peer_connected(int sockfd, const struct sockaddr_in* peer_addr, socklen_t peer_addr_len);
+fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, agent_t *agent_data);
+fd_status_t on_peer_ready_send(int sockfd);
 
 fd_status_t on_peer_connected(int sockfd, const struct sockaddr_in* peer_addr, 
         socklen_t peer_addr_len) {

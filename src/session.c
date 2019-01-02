@@ -1,8 +1,4 @@
-#include "session.h"
-
-char* socket_read(int fd, int *ret);
-char* msg_client_info(size_t *len, const cmd_t *req_cl);
-int append_null(char *str, int len);
+#include "main.h"
 
 char* socket_read(int fd, int *ret) {
     int     len = 0;
@@ -104,7 +100,7 @@ char* msg_client_info(size_t *len, const cmd_t *req_cl) {
     buff = strndup(str, len);
     
     free(file_buff);
-    close(fp);
+    fclose(fp);
     return buff;
 }
 

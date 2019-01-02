@@ -1,4 +1,5 @@
-#include "parse.h"
+#include "main.h"
+
 /** @brief      parse_string_to_json    문자열을 JSON 오브젝트로 변환
   * @params     str     변환할 문자열
   * @return     json    JSON 오브젝트
