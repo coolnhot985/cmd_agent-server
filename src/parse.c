@@ -67,11 +67,9 @@ char* parse_json_to_string(json_object *json_obj) {
     }
 }
 
-session_t* parse_json_cmd(json_object *json_obj) {
+void parse_json_cmd(json_object *json_obj, session_t *session) {
     enum    json_type type;
-    session_t   *session = NULL;
 
-    session = (session_t*)malloc(sizeof(session_t));
     json_object_object_foreach(json_obj, key, val) {
         type = json_object_get_type(val);
         switch (type) {

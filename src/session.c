@@ -13,12 +13,12 @@ char* socket_read(int fd, int *ret) {
 
     while (len >= 0) {
         memset(buff, 0x00, MAX_RECV_BUFF_SIZE);
-        //len = read(fd, buff, MAX_RECV_BUFF_SIZE);
         len = recv(fd, buff, MAX_RECV_BUFF_SIZE, MSG_DONTWAIT);
+
         if (len == 0) {
             /* return fd_status_NORW */
             *ret = -1;
-            return recv_data;
+            return NULL;
         } else if (len < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 *ret = -2;

@@ -74,6 +74,10 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
     size_t  result          = 0;
     
     recv_data = socket_read(fd, &ret);
+    if (recv_data == NULL) {
+        return fd_status_NORW;
+    }
+
     if (ret == -1) {
         return fd_status_NORW;
     } else if (ret == -2) {
@@ -89,12 +93,15 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
 
     recv_data_json = parse_string_to_json(recv_data);
     agent_type = get_agent_type(recv_data_json);
-    
+   
     if (agent_type == REQ_UX) {
-        session = parse_json_cmd(recv_data_json);
+        session->fd         = fd;
+        session->agent_type = REQ_UX;
+        parse_json_cmd(recv_data_json, session);
     } else if (agent_type == REQ_LINUX_CLAYMORE) {
+        session->fd         = fd;
+        session->agent_type = REQ_LINUX_CLAYMORE;
         parse_json_agent(recv_data_json, session);
-        session->fd = fd;
     }
 
     switch(agent_type) {
@@ -102,20 +109,17 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
             break;
         case (REQ_UX):
             /* UX 요청의 맥으로 세션테이블을 조회해 FD 를 얻음 */
+            ret = mysql_insert_fd(conn, "UX_SESSION", session->fd, REQ_UX);
             ret = mysql_select_fd(conn, session->miner_mac);
             if (ret < 0) {
-                DEBUG("Fail : mysql_select_fd");
-                /** 클라이언트 접속정보 쿼리 실패 
-                  * UX 로 클라이언트 접속실패 noti */
+                /* 클라이언트 접속정보 쿼리 실패*/
+                DEBUG("Fail : not found session");
             } else {
-                /** 클라이언트 접속정보 쿼리 성공 
-                 * 클라이언트 세션과 연결 */
+                /* 클라이언트 접속정보 쿼리 성공 - 클라이언트 세션과 연결 */
                 send_data = msg_client_info(&len_send_data, session);
                 result = send(ret, send_data, len_send_data, MSG_CONFIRM);
                 if (result > 0) {
                     /* 접속된 클라이언트로 실제 트레픽이 발송됨*/
-
-
                 } else {
                     /** 세션테이블에서 FD 로 가져와 클라이언트로 접속시도
                       * 세션테이블 FD 동기화 실패로 클라이언트와 통신실패 */
@@ -132,9 +136,7 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
             ready_to_send = true;
 #endif 
             /* 클라이언트 세션이 맺어지면 해당 세션FD 를 디비에 저장 */
-            ret = mysql_insert_fd(conn, session->miner_mac, session->fd);
-            if (ret < 0)
-                DEBUG("Fail : mysql_insert_fd");
+            ret = mysql_insert_fd(conn, session->miner_mac, session->fd, REQ_LINUX_CLAYMORE);
             break;
         case (REQ_WINDOW_CLAYMORE):
             break;
@@ -167,7 +169,6 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
     // result of the latest recv.
 
     //ready_to_send = true;
-    
     
     // ready_to_send 플래그에 따라서 다음 상대가 read 혹은 write 로 천이됨
     free(recv_data);
@@ -298,19 +299,27 @@ int main(int argc, const char** argv) {
             } else {
                 // A peer socket is ready.
                 if (events[i].events & EPOLLIN) {
-                    // Ready for reading.
-                    int fd = events[i].data.fd;
-                    fd_status_t status = on_peer_ready_recv(conn, fd, session);
-                    struct epoll_event event = {0};
+                    agent_type_t        agent_type  = 0;
+                    struct epoll_event  event       = {0};
+                    int fd                          = events[i].data.fd;
                     event.data.fd = fd;
+                    fd_status_t status = on_peer_ready_recv(conn, fd, session);
+
+                    if (!status.want_read && !status.want_write) {
+                        agent_type = mysql_select_session(conn, fd);
+                    }
+
                     if (status.want_read) {
                         event.events |= EPOLLIN;
                     }
+
                     if (status.want_write) {
                         event.events |= EPOLLOUT;
                     }
+
                     if (event.events == 0) {
-                        mysql_delete_fd(conn, session->miner_mac);
+                        mysql_delete_fd(conn, fd);
+
                         if (epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, NULL) < 0) {
                             perror_die("epoll_ctl EPOLL_CTL_DEL");
                         }

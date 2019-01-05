@@ -59,13 +59,14 @@ typedef enum {
   */
 typedef struct _session_t {
     int             fd;
-    agent_type_t    agent_type;
     int             client_fd;
+    agent_type_t    agent_type;
     char            *cmd_type;
     char            *miner_mac;
     char            *path;
     char            *path_install;
     int             sequence;
+    bool            seg_fin;
 }session_t;
 
 #if 0
@@ -92,16 +93,18 @@ int append_null(char *str, int len);
 
 /* log.c */
 MYSQL* mysql_conn(void); 
-int mysql_insert_fd(MYSQL *conn, char *miner_mac, int fd);
+int mysql_insert_fd(MYSQL *conn, char *miner_mac, int fd, agent_type_t agent_type);
 int mysql_select_fd(MYSQL *conn, char *miner_mac);
-int mysql_delete_fd(MYSQL *conn, char *miner_mac);
+int mysql_delete_mac(MYSQL *conn, char *miner_mac);
+int mysql_delete_fd(MYSQL *conn, int fd);
 int mysql_update_log(MYSQL *conn, int sequence, char *miner_mac, int status);
+int mysql_select_session(MYSQL *conn, int fd);
 
 /* parse.c */
 json_object* parse_string_to_json(char* str);
 int get_agent_type(json_object *json);
 char* parse_json_to_string(json_object *json_obj);
-session_t* parse_json_cmd(json_object *json_obj);
+void parse_json_cmd(json_object *json_obj, session_t *session);
 void parse_json_agent(json_object *json_obj, session_t *session);
 int parse_cmd_type(const char *cmd_type);
 
