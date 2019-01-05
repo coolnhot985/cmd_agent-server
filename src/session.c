@@ -53,7 +53,6 @@ char* msg_client_info(size_t *len, const session_t *session) {
     FILE        *fp         = NULL;
     char        *file_buff  = NULL;
     long        file_size   = 0; 
-    size_t      ret         = 0;
 
     json_object *json   = json_object_new_object();
     json_object *cmd    = json_object_new_string(session->cmd_type);
@@ -68,9 +67,10 @@ char* msg_client_info(size_t *len, const session_t *session) {
 
     switch (cmd_type) {
         case 1:
-            if ((fp = fopen(session->path, "r") != NULL)) {
+            if (((fp = fopen(session->path, "r")) != NULL)) {
+                size_t ret = 0;
                 fp = fopen(session->path, "r");
-                
+
                 /* 파일포인터를 파일끝으로 이동시켜 길이 계산 */
                 fseek(fp, 0, SEEK_END);
                 file_size = ftell(fp);
@@ -83,7 +83,11 @@ char* msg_client_info(size_t *len, const session_t *session) {
 
                 fseek(fp, 0, SEEK_SET);
                 ret = fread(file_buff, sizeof(char), (size_t)file_size, fp);
-                file_buff[file_size + 1] = NULL;
+                if (ret < 1) {
+                    DEBUG("not found fils");
+                }
+
+                file_buff[file_size + 1] = '\0';
                 break;
             }
     }
@@ -97,7 +101,7 @@ char* msg_client_info(size_t *len, const session_t *session) {
     str = json_object_get_string(json);
 
     *len = strlen(str);
-    buff = strndup(str, len);
+    buff = strndup(str, *len);
     
     free(file_buff);
     fclose(fp);

@@ -103,7 +103,6 @@ int mysql_select_session(MYSQL *conn, int fd);
 /* parse.c */
 json_object* parse_string_to_json(char* str);
 int get_agent_type(json_object *json);
-char* parse_json_to_string(json_object *json_obj);
 void parse_json_cmd(json_object *json_obj, session_t *session);
 void parse_json_agent(json_object *json_obj, session_t *session);
 int parse_cmd_type(const char *cmd_type);

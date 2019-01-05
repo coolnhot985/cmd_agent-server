@@ -299,15 +299,10 @@ int main(int argc, const char** argv) {
             } else {
                 // A peer socket is ready.
                 if (events[i].events & EPOLLIN) {
-                    agent_type_t        agent_type  = 0;
                     struct epoll_event  event       = {0};
                     int fd                          = events[i].data.fd;
                     event.data.fd = fd;
                     fd_status_t status = on_peer_ready_recv(conn, fd, session);
-
-                    if (!status.want_read && !status.want_write) {
-                        agent_type = mysql_select_session(conn, fd);
-                    }
 
                     if (status.want_read) {
                         event.events |= EPOLLIN;

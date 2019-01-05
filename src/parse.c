@@ -18,40 +18,27 @@ json_object* parse_string_to_json(char* str) {
   */
 int get_agent_type(json_object *json) {
     enum json_type  type;
-    const char      *str = NULL;
+    const char      *value = NULL;
 
     json_object_object_foreach(json, key, val) {
         type = json_object_get_type(val);
         switch (type) {
             case json_type_string :
-                str = json_object_get_string(val);
-                if (str != NULL) {
-                    if (strcmp(str, AGENT_TYPE_LINUX_NVIDIA) == 0) {
+                value = json_object_get_string(val);
+                if (value != NULL) {
+                    if (strcmp(value, AGENT_TYPE_LINUX_NVIDIA) == 0) {
                         return REQ_LINUX_CLAYMORE;
-                    } else if (strcmp(str, AGENT_TYPE_UX) == 0) {
+                    } else if (strcmp(value, AGENT_TYPE_UX) == 0) {
                         return REQ_UX;
                     }
                 }
                 /* JSON 데이터에서 첫번째 키만 파싱 */
                 goto INVALID_PACKET;
-        }
-    }
-INVALID_PACKET:
-
-    return REQ_INVALID;
-}
-
-char* parse_json_to_string(json_object *json_obj) {
-    enum json_type type;
-
-    json_object_object_foreach(json_obj, key, val) {
-        type = json_object_get_type(val);
-        switch (type) {
-            case json_type_null :
+            case json_type_null:
                 break;
-            case json_type_boolean :
+            case json_type_boolean:
                 break;
-            case json_type_double :
+            case json_type_double:
                 break;
             case json_type_int:
                 break;
@@ -59,12 +46,16 @@ char* parse_json_to_string(json_object *json_obj) {
                 break;
             case json_type_array:
                 break;
-            case json_type_string: 
-                printf("type: json_type_string, ");
-                printf("value: [%s]\n", json_object_get_string(val));
-                break;
         }
     }
+INVALID_PACKET:
+
+    if (key == NULL) {
+        /* 해당 조건문은 아무것도 수행하지않음
+           JSON 라이브러리 KEY warning 삭제용도 */
+    }
+
+    return REQ_INVALID;
 }
 
 void parse_json_cmd(json_object *json_obj, session_t *session) {
@@ -73,18 +64,6 @@ void parse_json_cmd(json_object *json_obj, session_t *session) {
     json_object_object_foreach(json_obj, key, val) {
         type = json_object_get_type(val);
         switch (type) {
-            case json_type_null :
-                break;
-            case json_type_boolean :
-                break;
-            case json_type_double :
-                break;
-            case json_type_int:
-                break;
-            case json_type_object:
-                break;
-            case json_type_array:
-                break;
             case json_type_string: 
                 if (strcmp(key, "commend_type") == 0) {
                     session->cmd_type = (char*)json_object_get_string(val);
@@ -108,9 +87,21 @@ void parse_json_cmd(json_object *json_obj, session_t *session) {
                     }
                 }
                 break;
+            case json_type_null :
+                break;
+            case json_type_boolean :
+                break;
+            case json_type_double :
+                break;
+            case json_type_int:
+                break;
+            case json_type_object:
+                break;
+            case json_type_array:
+                break;
         }
     }
-    return session;
+    return;
 }
 
 void parse_json_agent(json_object *json_obj, session_t *session) {
