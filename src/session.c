@@ -18,6 +18,7 @@ char* socket_read(int fd, int *ret) {
         if (len == 0) {
             /* return fd_status_NORW */
             *ret = -1;
+            mj_free(recv_data);
             return NULL;
         } else if (len < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -103,7 +104,7 @@ char* msg_client_info(size_t *len, const session_t *session) {
     *len = strlen(str);
     buff = strndup(str, *len);
     
-    free(file_buff);
+    mj_free(file_buff);
     fclose(fp);
     return buff;
 }

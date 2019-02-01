@@ -4,13 +4,15 @@ MYSQL* mysql_conn(void) {
     MYSQL *conn = NULL;
     conn = (MYSQL*)malloc(sizeof(MYSQL));
 
+    /* mysql_init 리턴값 받아서 풀어주지않으면 메모리 누수 */
     mysql_init(conn);
+    conn = mysql_real_connect(conn, HOST, USER, PASSWD, DB_NAME, 3306, NULL, 0);
 
-    if (!mysql_real_connect(conn, HOST, USER, PASSWD, DB_NAME, 3306, NULL, 0)) {
-        /* ERR */
+    /* ERR */
+    if (NULL == conn) {
         DEBUG("Fail : mysql_real_connectr [%s]\n", mysql_error(conn));
     }
-
+    
     return conn; 
 }
 

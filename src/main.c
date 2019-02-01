@@ -52,8 +52,6 @@ fd_status_t on_peer_connected(int sockfd, const struct sockaddr_in* peer_addr,
     // Initialize state to send back a '*' to the peer immediately.
     peer_state_t* peerstate = &global_state[sockfd];
 
-    peerstate->send_data = (char*)malloc(SYNACK_LEN);
-    memcpy(peerstate->send_data, "SYN_ACK\0", SYNACK_LEN);
     peerstate->state = INITIAL_ACK;
     peerstate->sendptr = 0;
     peerstate->sendbuf_end = SYNACK_LEN;
@@ -75,6 +73,7 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
     
     recv_data = socket_read(fd, &ret);
     if (recv_data == NULL) {
+        mj_free(recv_data);
         return fd_status_NORW;
     }
 
@@ -171,7 +170,8 @@ fd_status_t on_peer_ready_recv(MYSQL *conn, int fd, session_t *session) {
     //ready_to_send = true;
     
     // ready_to_send 플래그에 따라서 다음 상대가 read 혹은 write 로 천이됨
-    free(recv_data);
+    mj_free(recv_data);
+    json_object_put(recv_data_json);
     return (fd_status_t){.want_read = !ready_to_send, 
         .want_write = ready_to_send};
 }
@@ -214,9 +214,12 @@ int main(int argc, const char** argv) {
     MYSQL   *conn               = NULL;
     static session_t *session   = NULL;
 
+    int epollfd = 0;
+
     conn = mysql_conn(); 
     if (conn == NULL) {
         DEBUG("Fail : conn databases");
+        return -1;
     }
 
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -230,7 +233,7 @@ int main(int argc, const char** argv) {
     int listener_sockfd = listen_inet_socket(portnum);
     make_socket_non_blocking(listener_sockfd);
 
-    int epollfd = epoll_create1(0);
+    epollfd = epoll_create1(0);
     if (epollfd < 0) {
         perror_die("epoll_create1");
     }
@@ -348,8 +351,9 @@ int main(int argc, const char** argv) {
                 }
             }
         }
-        free(session);
+        mj_free(session);
     }
-    free(conn);
+    mysql_close(conn);
+    mj_free(conn);
     return 0;
 }

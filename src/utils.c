@@ -85,3 +85,9 @@ void make_socket_non_blocking(int sockfd) {
         perror_die("fcntl F_SETFL O_NONBLOCK");
     }
 }
+
+void mj_free(void *data) {
+    if (data != NULL) {
+        free(data);
+    }
+}

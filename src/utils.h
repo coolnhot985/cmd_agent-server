@@ -27,4 +27,7 @@ int listen_inet_socket(int portnum);
 // Sets the given socket into non-blocking mode.
 void make_socket_non_blocking(int sockfd);
 
+// MJ 
+void mj_free(void *);
+
 #endif /* UTILS_H */
